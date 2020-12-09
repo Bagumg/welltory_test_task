@@ -1,9 +1,24 @@
 import json
-import os
-import collections
+import logging
+
+logger = logging.getLogger('welltory')
+
+with open('schema/label_selected.schema', 'r') as file:
+    schema_file = json.load(file)
+
+with open('event/ba25151c-914f-4f47-909a-7a65a6339f34.json') as file:
+    json_file = json.load(file)
+
+graph = schema_file
 
 
-def bfs(graph, root):
+def bfs(graph: dict, root: list):
+    """
+    Breadth First Search function. Traversing graph keys and  values.
+    :param graph: JSON dictionary for BFS(Breadth First Search)
+    :param root: Graph root and list for iterations
+    :return: Visited keys in graph and types of graph values
+    """
     visited = list()
     types = dict()
     try:
@@ -24,19 +39,16 @@ def bfs(graph, root):
     return visited, types
 
 
-with open('schema/label_selected.schema', 'r') as file:
-    schema_file = json.load(file)
-
-graph = schema_file
 structure, types = bfs(graph, list(graph.keys()))
 
-with open('event/ba25151c-914f-4f47-909a-7a65a6339f34.json') as file:
-    json_file = json.load(file)
 
-dict_for_compare = {}
-
-
-def compare_required(json_file, schema_file):
+def compare_required(json_file: dict, schema_file: dict):
+    """
+    Compares required fileds from schema file with json file
+    :param json_file: json file dictionary to compare
+    :param schema_file: schema file dictionary to get required fields
+    :return: None, just printing mistakes
+    """
     required = schema_file.get('required')
     data = list(json_file.get('data').keys())
     result = [key for key in required if key not in data]
@@ -49,23 +61,13 @@ def compare_required(json_file, schema_file):
         print(f'JSON file is fine')
 
 
-def get_required(file):
-    required = file.get('required')
-    print(required)
-
-
-def get_keys(file):
-    keys = file.keys()
-    print(keys)
-
-
-def get_properties(file):
-    properties = file.get('properties')
-    return properties
-
-
-def compare_types(json_file, schema_file):
-    # filetypes = list(schema_file['properties'].values())
+def compare_types(json_file: dict, schema_file: dict):
+    """
+    Compares filetypes from schema file with json file values
+    :param json_file: json file dictionary to compare
+    :param schema_file: schema file dictionary to get required filetypes
+    :return: list of json_types and list of schema_types
+    """
     schema_keys = list(schema_file['properties'].keys())
     json_keys = list(json_file['data'].keys())
     schema_types = [schema_file['properties'].get(i)['type'] for i in schema_keys]
@@ -75,6 +77,4 @@ def compare_types(json_file, schema_file):
 
 
 if __name__ == '__main__':
-    # compare_required(json_file, schema_file)
-    # get_properties(schema_file)
     print(compare_types(json_file, schema_file))
